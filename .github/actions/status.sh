@@ -15,7 +15,7 @@ get_workflow_status_value() {
   workflow_status=$(echo "$workflow_details" | jq --raw-output '.status')
   while [ "$workflow_status" != "completed" ]
   do
-    sleep 3m
+    sleep 1m
     workflow_response=$(curl -sSD build_image_workflow_response_header.txt -H "${AUTH_HEADER}" -H "${API_HEADER}" "${URI}/repos/${GITHUB_REPOSITORY}/actions/workflows/$workflow_file/runs?branch=$branch_name&per_page=1" | jq '.')
 
     echo "$workflow_response" > build_image_workflow_response_body.txt
