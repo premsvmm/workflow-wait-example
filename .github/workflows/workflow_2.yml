@@ -1,0 +1,31 @@
+on: [ push ]
+jobs:
+  cancel-previous-job:
+    name: Cancel previous workflow
+    if: always()
+    timeout-minutes: 1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel previous workflow
+        uses: styfle/cancel-workflow-action@0.9.1
+        if: github.ref != 'refs/heads/master'
+        with:
+          all_but_latest: true
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_id: ${{ github.event.workflow.id }}
+  job2:
+    name: Test Job 2s
+    needs: [ cancel-previous-job ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get Build Image Workflow Status
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          WORKFLOW: workflow_1.yml
+        run: |
+          echo "WORKFLOW_STATUS=$(sh ./.github/actions/status.sh)" >> $GITHUB_ENV
+      - name: Check Workflow Status
+        run: echo $WORKFLOW_STATUS

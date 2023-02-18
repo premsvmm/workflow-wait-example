@@ -1,0 +1,26 @@
+on: [ push ]
+jobs:
+  cancel-previous-job:
+    name: Cancel previous workflow
+    if: always()
+    timeout-minutes: 1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel previous workflow
+        uses: styfle/cancel-workflow-action@0.9.1
+        if: github.ref != 'refs/heads/master'
+        with:
+          all_but_latest: true
+          access_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow_id: ${{ github.event.workflow.id }}
+  job1:
+    name: Test Job 1
+    needs: [ cancel-previous-job ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run single command
+        run: |
+        sleep 30
+        echo "Job executed"
